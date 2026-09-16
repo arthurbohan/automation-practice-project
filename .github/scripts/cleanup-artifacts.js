@@ -1,16 +1,3 @@
-/**
- * .github/scripts/cleanup-artifacts.js
- *
- * Deletes workflow-run artifacts older than the retention window, except AI
- * reports / self-healing summaries / test-failure artifacts, which are kept
- * longer for post-mortem review.
- *
- * Invoked from playwright.yml via actions/github-script:
- *   script: |
- *     const cleanup = require('./.github/scripts/cleanup-artifacts.js')
- *     await cleanup({ github, context })
- */
-
 const RETENTION_DAYS = 7
 const KEEP_LONGER_PREFIXES = ['ai-analysis', 'self-healing', 'test-artifacts']
 

@@ -1,17 +1,5 @@
 name: Full Regression
 
-# workflow_dispatch-only, on purpose — this is the CI equivalent of
-# `npm run regression` (scripts/../.github/scripts/runRegression.sh), for
-# when the suite outgrows "fast enough to gate every PR on".
-#
-# Not wired into pr-checks.yml or on-merge.yml at all: those two stay a
-# small, fast merge gate (lint + tests + advisory risk analysis) regardless
-# of how large this suite eventually gets — a 1000-test / 20-minute run has
-# no business blocking a PR. This is the safety-net alternative: run the
-# whole thing on demand, publish an Allure report, get a Telegram summary.
-# Nothing here reuses another run's artifacts — it tests fresh and reports
-# on itself.
-
 on:
   workflow_dispatch:
 
@@ -21,10 +9,6 @@ permissions:
 jobs:
 
   # ─── JOB 1: E2E tests with sharding + Docker ─────────────────────────────────
-  #
-  # The full suite, sharded — unlike pr-checks.yml's test-e2e-smoke, which
-  # only runs the @smoke-tagged subset as the actual PR gate. As the suite
-  # grows, this is the job that scales (more shards), not the trigger model.
 
   test-e2e:
     name: E2E Shard ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
@@ -161,11 +145,6 @@ jobs:
           retention-days: 1
 
   # ─── JOB 3: Publish Allure to GitHub Pages ───────────────────────────────────
-  #
-  # Downloads THIS run's own artifacts (no cross-run lookup — unlike
-  # on-merge.yml, there's no separate PR run to reuse, this run IS the test
-  # run). Only attempts the deploy when dispatched against main — the
-  # github-pages environment rejects deploys from any other ref anyway.
 
   publish-allure:
     name: Publish Allure Report
@@ -245,8 +224,6 @@ jobs:
       - name: Send Telegram notification
         run: bash .github/scripts/notify-telegram.sh
         env:
-          # needs.test-e2e.result is per-shard-matrix — 'success' only if
-          # every shard succeeded, same semantics as a single conclusion.
           E2E_STATUS: ${{ needs.test-e2e.result }}
           API_STATUS: ${{ needs.test-api.result }}
           EVENT_NAME: manual

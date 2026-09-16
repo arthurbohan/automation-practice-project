@@ -1,22 +1,8 @@
 #!/usr/bin/env bash
-#
-# .github/scripts/runRegression.sh
-#
-# Manual, local "run everything" — full regression (both projects) + Allure
-# report + Telegram notification, on demand from your own machine. No CI
-# trigger involved on purpose — this doesn't touch push/pull_request/
-# workflow_dispatch, it's a standalone local command.
-#
-# Reuses notify-telegram.sh as-is: that script only ever reads plain env
-# vars, no ${{ }} GitHub Actions syntax, so it works identically here.
-#
-# Usage: npm run regression
 
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 
-# Load TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID / GROQ_API_KEY from .env —
-# bash doesn't auto-load it the way dotenv does for the TS scripts.
 if [[ -f .env ]]; then
   set -a
   # shellcheck disable=SC1091
