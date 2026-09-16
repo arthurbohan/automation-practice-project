@@ -55,9 +55,6 @@ export class InventoryPage extends BasePage {
         return this.page.getByTestId(`remove-${slug}`)
     }
 
-    /** Returns the WHOLE .inventory_item card (image + name + description +
-     *  price + button), not just the product name — its innerText() contains
-     *  all of that. To assert just the name, use getItemNames() instead. */
     itemByName(name: string) {
         return this.page.locator('.inventory_item').filter({ hasText: name })
     }
@@ -110,28 +107,12 @@ export class InventoryPage extends BasePage {
         await this.openedBurgerMenu.waitFor({ state: 'visible' })
     }
 
-    /**
-     * COMPOSITE: already calls openBurgerMenu() internally before clicking
-     * Logout. Never call openBurgerMenu() yourself right before this — the
-     * burger icon is a toggle, so opening it twice closes the menu again
-     * mid-click and the test times out waiting for an element that just
-     * slid out of view. Only call openBurgerMenu() on its own when the
-     * test's purpose IS verifying the menu opens (assert openedBurgerMenu
-     * is visible) and it does NOT then log out.
-     */
     async logout() {
         await this.openBurgerMenu()
         await this.page.getByTestId('logout-sidebar-link').click()
         await this.page.waitForURL('/')
     }
 
-    /**
-     * COMPOSITE — same call-order caveat as logout() above. Sidebar stays
-     * open afterward (use closeBurgerMenu() if needed). Clears the cart
-     * badge/count but not each item's own Add/Remove button state — use
-     * getCartCount(), not addToCartBtn/removeBtn, to check cart state
-     * right after this.
-     */
     async resetAppState() {
         await this.openBurgerMenu()
         await this.resetAppStateLink.click()

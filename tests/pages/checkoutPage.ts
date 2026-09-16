@@ -43,14 +43,6 @@ export class CheckoutPage extends BasePage {
     await this.page.goto('/checkout-step-one.html')
   }
 
-  /**
-   * COMPOSITE: fills all three fields, clicks continueButton, AND waits for
-   * navigation to step-two — a complete action, not just a fill. Never call
-   * continueButton.click() again right after this (double-click bug). Don't
-   * use this for a validation-error test either: with an empty field there
-   * is no navigation, so the waitForURL() below hangs until the test times
-   * out — fill each input yourself and click continueButton once instead.
-   */
   async fillShippingInfo(info: ShippingInfo) {
     await this.firstNameInput.fill(info.firstName)
     await this.lastNameInput.fill(info.lastName)

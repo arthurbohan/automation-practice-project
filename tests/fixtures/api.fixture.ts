@@ -1,14 +1,3 @@
-/*
- * API client for JSONPlaceholder — a free, public REST API 
- * with no authentication or registration required. 
- * 
- * baseURL: https://jsonplaceholder.typicode.com 
- * Resources: /posts, /comments, /users, /todos, /albums, /photos 
- * 
- * POST/PUT/PATCH/DELETE are simulated — data is not actually saved, 
- * but the server returns the correct statuses and response structures. 
- */
-
 import { test as base, APIRequestContext } from '@playwright/test'
 
 export type ApiFixtures = {

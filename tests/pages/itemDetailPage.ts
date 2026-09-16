@@ -18,14 +18,6 @@ export class ItemDetailPage extends BasePage {
 
     // ── Standard methods ──────────────────────────────────────────
 
-    /**
-     * Numeric ids are assigned by the app per product (backpack=4, bike
-     * light=0, ...) and aren't derivable from ProductSlug, so default to
-     * the backpack — the same item the other fixtures (filledCartPage,
-     * checkoutPage) use as their anchor product. Prefer reaching this page
-     * via InventoryPage.openItem(name) in real flows; this direct goto is
-     * for standalone access.
-     */
     async goto(id: number = 4) {
         await this.page.goto(`/inventory-item.html?id=${id}`)
         await this.name.waitFor({ state: 'visible' })

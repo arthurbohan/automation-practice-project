@@ -26,14 +26,6 @@ export abstract class BasePage {
   }
 
   // ── Self-healing helpers ──────────────────────────────────────
-  // Each method tries the original locator first.
-  // If it fails within 3s → asks Groq for an alternative.
-  // On success → logs a warning with the healed selector.
-  // Available in every Page Object via `this.`
-  //
-  // All take the same shape: (locator, ...args, description) — description
-  // is a plain-English hint for what the element is, used only if healing
-  // is needed. e.g. this.clickHealed(this.loginButton, 'Login submit button')
 
   /** Heals the locator, then clicks it. */
   async clickHealed(locator: Locator, description: string): Promise<void> {
