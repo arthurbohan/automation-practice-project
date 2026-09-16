@@ -11,10 +11,6 @@ export const DEFAULT_BRANCHES: Branch[] = [
 ]
 
 async function fulfillCompleted(route: Route, text: string) {
-  // A same-tick fulfill can let React batch the loading=true and
-  // loading=false renders together, so tests asserting on the loading
-  // indicator (getByTestId('loading')) never observe it. A short delay
-  // gives that intermediate render an actual chance to happen.
   await new Promise((resolve) => setTimeout(resolve, 50))
   return route.fulfill({
     status: 200,
@@ -26,12 +22,6 @@ async function fulfillCompleted(route: Route, text: string) {
   })
 }
 
-// Routes on request CONTENT, not call order — branchPrompt() (src/api.js)
-// always contains "Map five directions", deepPrompt()/nodePrompt() always
-// contain "explain what is musically happening". Whatever artist name was
-// actually asked for gets echoed back as node.name, so callers don't need
-// to pre-register a response per artist — this also makes "surprise me"
-// (random seed, not chosen by the test) work without special-casing.
 export async function mockGemini(page: Page, { branches = DEFAULT_BRANCHES, deepText = 'This links back through a shared rhythmic approach and studio technique.' }: { branches?: Branch[], deepText?: string } = {}) {
   await page.route('**/api/gemini/v1beta/interactions', async (route) => {
     const body = route.request().postDataJSON()
