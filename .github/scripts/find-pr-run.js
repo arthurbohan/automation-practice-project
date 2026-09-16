@@ -1,22 +1,3 @@
-/**
- * .github/scripts/find-pr-run.js
- *
- * On a push to main (i.e. a merge landing), finds the pull_request-triggered
- * CI run (pr-checks.yml) that already tested this exact code, so
- * publish-allure and notify-telegram can reuse its artifacts instead of
- * re-running the whole suite a second time.
- *
- * Uses listPullRequestsAssociatedWithCommit — GitHub's own tracked
- * commit↔PR association — rather than guessing from the commit message, so
- * it works for every merge strategy (merge commit, squash, rebase), not
- * just "Create a merge commit".
- *
- * Invoked from on-merge.yml via actions/github-script:
- *   script: |
- *     const find = require('./.github/scripts/find-pr-run.js')
- *     await find({ github, context, core })
- */
-
 module.exports = async ({ github, context, core }) => {
   const { owner, repo } = context.repo
 
@@ -45,11 +26,6 @@ module.exports = async ({ github, context, core }) => {
     per_page: 30,
   })
 
-  // Match by head SHA, not run.pull_requests — GitHub empties that array
-  // retroactively once a PR closes (documented behavior: it only lists PRs
-  // that are still open at the time of the API call), and by the time this
-  // runs the PR is always already merged/closed. head_sha is a plain commit
-  // SHA comparison and doesn't have that problem.
   const match = runs.workflow_runs.find((run) => run.head_sha === merged.head.sha)
 
   if (!match) {

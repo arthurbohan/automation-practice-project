@@ -1,34 +1,4 @@
 #!/usr/bin/env bash
-#
-# .github/scripts/notify-telegram.sh
-#
-# Sends the run status to Telegram, with a short AI-analysis snippet
-# attached when the run failed and an analysis was generated.
-#
-# All untrusted values (PR title, ref name, etc.) come in via env vars set
-# by the workflow — never interpolate ${{ }} directly into this file, that
-# reintroduces the script-injection risk this extraction exists to avoid.
-#
-# Runs in three contexts:
-#   1. CI, on push to main (the merge landing) — see on-merge.yml. Reports on
-#      find-pr-run's resolved pr-checks.yml run rather than a fresh one.
-#   2. CI, on workflow_dispatch — see full-regression.yml. A heavy/full
-#      regression run, deliberately kept off the PR gate; reports on itself.
-#   3. Locally, via .github/scripts/runRegression.sh (EVENT_NAME=local) — the
-#      same full regression, run from a laptop instead of CI.
-#
-# Required env vars:
-#   E2E_STATUS, API_STATUS        — both carry find-pr-run's single overall conclusion
-#   EVENT_NAME                    — 'pull_request', 'merged', 'manual' (full-regression.yml), or 'local'
-#   PR_NUMBER                     — the merged PR's number, from find-pr-run (empty outside context 1)
-#   PR_TITLE                      — the merged PR's title, from find-pr-run (empty outside context 1)
-#   TRIGGERED_BY                  — github.actor, only set for EVENT_NAME=manual
-#   REF_NAME                      — github.ref_name
-#   REPO_OWNER, REPO_NAME         — github.repository_owner / repo name
-#   RUN_URL                       — link to the run being reported on
-#   COMMIT_SHA                    — github.sha
-#   TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
-#   AI_SUMMARY_PATH                — path to ai-analysis-summary.md, if downloaded
 
 set -euo pipefail
 
@@ -55,10 +25,6 @@ else
   TRIGGER="Push to ${REF_NAME}"
 fi
 
-# `merged` is a merge announcement, not a fresh test report — pr-checks.yml
-# already had to pass for this push to exist, so there's no Allure report to
-# link (that only gets (re)published from full-regression.yml / npm run
-# regression, on demand) and no separate E2E/API breakdown to show.
 if [[ "$EVENT_NAME" == "merged" ]]; then
   if [[ "$STATUS_ICON" == "PASSED" ]]; then
     MESSAGE="*Merged — PR #${PR_NUMBER}*
@@ -80,10 +46,6 @@ ${PR_TITLE}
 🔗 [CI run](${RUN_URL})"
   fi
 elif [[ "$EVENT_NAME" == "local" ]]; then
-  # No CI run to link to, and the public Allure URL is whatever was last
-  # published (a merge or a CI full-regression run) - showing it here would
-  # read as this run's report when it is not. runRegression.sh already
-  # opens the real one (npm run allure:open) right after this fires.
   MESSAGE="*Playwright Tests — ${STATUS_ICON}*
 
 Status: ${STATUS_TEXT}
@@ -108,25 +70,9 @@ API: ${API_STATUS}
 🔗 [GitHub Actions](${RUN_URL})"
 fi
 
-# Append a short AI-analysis snippet if one was downloaded — applies in any
-# context (a failed manual/local regression, or a rare merged-but-failing
-# bypass). Prefer the "Manual Tester Verdict" rollup (product bug vs
-# test/environment issue, plain language, no code) over a blind first-lines
-# grab — it's written for exactly this audience. Falls back to the old
-# generic snippet for analyses that predate that section (e.g. a cache hit
-# from before this prompt existed).
 if [[ -n "${AI_SUMMARY_PATH:-}" && -f "$AI_SUMMARY_PATH" ]]; then
-  # Each grep below legitimately finds nothing when its section is absent
-  # (that IS the "try the next fallback" signal) — grep exits 1 on no
-  # match, and under set -euo pipefail that would kill the whole script
-  # right here instead of falling through, so every attempt is `|| true`.
   AI_SNIPPET=$(sed -n '/^## 🧭 Manual Tester Verdict$/,/^---$/p' "$AI_SUMMARY_PATH" | sed '1d;$d' | grep -v "^$" || true)
   if [[ -z "$AI_SNIPPET" ]]; then
-    # No rollup section — a single-failure report skips it (see
-    # reporter.ts) since it would just repeat the one Detailed Analysis
-    # entry's own verdict back to back. Pull that verdict directly instead
-    # of falling through to a blind first-lines grab, which would pick up
-    # the Summary stats (already shown elsewhere in this message) first.
     AI_SNIPPET=$(sed -n '/^## Manual Verdict$/,/^## /p' "$AI_SUMMARY_PATH" | sed '1d;$d' | grep -v "^$" || true)
   fi
   if [[ -z "$AI_SNIPPET" ]]; then

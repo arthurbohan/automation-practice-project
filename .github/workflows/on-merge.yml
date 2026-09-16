@@ -1,14 +1,5 @@
 name: On Merge
 
-# Push-only, separate from pr-checks.yml on purpose: this never re-runs the
-# test suite. It locates the pull_request run that already tested this exact
-# commit and sends a short "merged, checks were green" Telegram notification
-# — no Allure publish here. A merge only happens once pr-checks.yml already
-# passed, so re-publishing a report that's guaranteed green adds nothing;
-# the Allure report lives in full-regression.yml / npm run regression
-# instead, where it actually reflects a fresh, specific run someone asked
-# to see.
-
 on:
   push:
     branches: [main]
@@ -23,11 +14,6 @@ concurrency:
 jobs:
 
   # ─── JOB 1: Locate the merged PR's CI run ────────────────────────────────────
-  #
-  # Resolves which pr-checks.yml run already tested this exact code — mainly
-  # so notify-telegram below can link back to it and name the PR. Works for
-  # any merge strategy — uses GitHub's own commit↔PR tracking, not a
-  # SHA/message guess. See .github/scripts/find-pr-run.js.
 
   find-pr-run:
     name: Locate merged PR's CI run
@@ -58,12 +44,6 @@ jobs:
             await find({ github, context, core })
 
   # ─── JOB 2: Telegram notification ────────────────────────────────────────────
-  #
-  # A merge announcement, not a fresh test report: pr-checks.yml already had
-  # to pass for this push to exist. The AI-analysis download below only ever
-  # finds something on the rare case find-pr-run resolves a non-success
-  # conclusion (e.g. a direct push bypassing review) — normal merges have
-  # nothing to download there.
 
   notify-telegram:
     name: Telegram Notification
@@ -93,11 +73,6 @@ jobs:
       - name: Send Telegram notification
         run: bash .github/scripts/notify-telegram.sh
         env:
-          # Untrusted values (PR title etc.) travel as env vars, never as
-          # ${{ }} text interpolated straight into the shell script.
-          # E2E_STATUS/API_STATUS both carry the PR run's single overall
-          # conclusion — there's no separate e2e/api result to report here,
-          # the suite already ran once, on the PR.
           E2E_STATUS: ${{ needs.find-pr-run.outputs.conclusion }}
           API_STATUS: ${{ needs.find-pr-run.outputs.conclusion }}
           EVENT_NAME: merged
