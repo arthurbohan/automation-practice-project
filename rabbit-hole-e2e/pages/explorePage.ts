@@ -15,9 +15,6 @@ export class ExplorePage {
   get errorState() { return this.page.getByTestId('error') }
   get retryButton() { return this.page.getByTestId('retry') }
 
-  // NodeCard renders before the branches.map() list, and branches carry
-  // their own copies of these same buttons — .first() always means the
-  // node's own button, never a branch's.
   get addToCrateButton() { return this.page.getByRole('button', { name: 'Add to crate' }).first() }
   get inCrateButton() { return this.page.getByRole('button', { name: 'In crate' }).first() }
   get digDeeperButton() { return this.page.getByRole('button', { name: 'Dig deeper' }).first() }

@@ -1,12 +1,16 @@
-# Saucedemo — Playwright Test Automation Framework
+# QA Automation Practice Project
 
-AI-augmented QA project — risk analysis, test generation, self-healing
-locators, and AI failure analysis all run for real in this repo's CI, not
-as demo stubs.
+My personal practice project for test automation with Playwright and
+TypeScript — a production-style setup with real CI/CD, risk analysis, AI
+test generation, self-healing locators, and AI failure analysis all
+running for real, not as demo stubs.
 
-A production-style test automation framework built with Playwright and TypeScript,
-covering UI end-to-end tests for [saucedemo.com](https://www.saucedemo.com)
-and REST API tests for [jsonplaceholder.typicode.com](https://jsonplaceholder.typicode.com).
+It deliberately targets a few different kinds of surfaces, each practicing
+something different:
+
+- UI end-to-end tests against [saucedemo.com](https://www.saucedemo.com), a public demo storefront
+- REST API tests against [jsonplaceholder.typicode.com](https://jsonplaceholder.typicode.com)
+- A second personal app ([rabbit-hole](https://github.com/arthurbohan/rabbit-hole)), tested cross-repo via Docker Compose — see `rabbit-hole-e2e/`
 
 ---
 
